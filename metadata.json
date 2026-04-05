@@ -1,0 +1,10 @@
+{
+  "name": "FRIDAY",
+  "description": "A comprehensive all-in-one productivity suite featuring AI assistance, document tools, time management, and utility gadgets.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation",
+    "display-capture"
+  ]
+}
