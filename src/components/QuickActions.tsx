@@ -169,7 +169,7 @@ export function QuickActions({ onAction, theme }: QuickActionsProps) {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className={`relative w-full md:w-72 group`}>
-            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${theme === 'dark' ? 'text-white/20 group-focus-within:text-friday-cyan' : 'text-black/20 group-focus-within:text-indigo-600'}`} />
+            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${theme === 'dark' ? 'text-white/20 group-focus-within:text-max-cyan' : 'text-black/20 group-focus-within:text-indigo-600'}`} />
             <input
               type="text"
               placeholder="FILTER PROTOCOLS..."
@@ -177,7 +177,7 @@ export function QuickActions({ onAction, theme }: QuickActionsProps) {
               onChange={(e) => setSearch(e.target.value)}
               className={`w-full pl-12 pr-10 py-3 rounded-2xl text-[10px] tracking-[0.2em] font-mono outline-none transition-all ${
                 theme === 'dark' 
-                  ? 'bg-white/5 border border-white/10 text-white focus:bg-white/10 focus:border-friday-cyan/50' 
+                  ? 'bg-white/5 border border-white/10 text-white focus:bg-white/10 focus:border-max-cyan/50' 
                   : 'bg-black/5 border border-black/10 text-black focus:bg-black/10 focus:border-indigo-500/50'
               }`}
             />
@@ -198,7 +198,7 @@ export function QuickActions({ onAction, theme }: QuickActionsProps) {
                 onClick={() => setActiveCategory(category)}
                 className={`px-5 py-2 rounded-xl text-[10px] font-mono tracking-[0.2em] uppercase transition-all whitespace-nowrap ${
                   activeCategory === category
-                    ? 'bg-white/10 text-friday-cyan shadow-[0_0_20px_rgba(0,255,255,0.2)] border border-white/10'
+                    ? 'bg-white/10 text-max-cyan shadow-[0_0_20px_rgba(0,255,255,0.2)] border border-white/10'
                     : 'text-white/40 hover:text-white/70 hover:bg-white/5 border border-transparent'
                 }`}
               >
@@ -244,7 +244,7 @@ export function QuickActions({ onAction, theme }: QuickActionsProps) {
               </div>
 
               {/* Decorative Corner Element */}
-              <div className={`absolute top-4 right-4 w-1.5 h-1.5 rounded-full transition-colors ${theme === 'dark' ? 'bg-white/5 group-hover:bg-friday-cyan/40' : 'bg-black/5 group-hover:bg-indigo-500/40'}`} />
+              <div className={`absolute top-4 right-4 w-1.5 h-1.5 rounded-full transition-colors ${theme === 'dark' ? 'bg-white/5 group-hover:bg-max-cyan/40' : 'bg-black/5 group-hover:bg-indigo-500/40'}`} />
             </motion.button>
           ))}
         </AnimatePresence>

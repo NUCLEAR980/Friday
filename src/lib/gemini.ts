@@ -21,8 +21,12 @@ export async function askGemini(prompt: string, systemInstruction?: string) {
       },
     });
     return response.text;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini error:", error);
+    const errorMessage = error.message || String(error);
+    if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+      return "Error: API Quota Exceeded. Please check your billing details or add a valid API key in Settings.";
+    }
     return "Error: Failed to get response from AI.";
   }
 }
@@ -40,8 +44,12 @@ export async function extractTextFromImage(base64Image: string) {
       },
     });
     return response.text;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini Vision error:", error);
+    const errorMessage = error.message || String(error);
+    if (errorMessage.includes('quota') || errorMessage.includes('429')) {
+      return "Error: API Quota Exceeded. Please check your billing details or add a valid API key in Settings.";
+    }
     return "Error: Failed to extract text.";
   }
 }

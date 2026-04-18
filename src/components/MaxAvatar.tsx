@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Loader2 } from 'lucide-react';
 
-interface FridayAvatarProps {
+interface MaxAvatarProps {
   isConnected: boolean;
   isConnecting: boolean;
   isSpeaking: boolean;
@@ -13,7 +13,7 @@ interface FridayAvatarProps {
   onClick?: () => void;
 }
 
-export function FridayAvatar({
+export function MaxAvatar({
   isConnected,
   isConnecting,
   isSpeaking,
@@ -22,7 +22,7 @@ export function FridayAvatar({
   userVolume,
   theme,
   onClick
-}: FridayAvatarProps) {
+}: MaxAvatarProps) {
   // Smooth out volumes for less jittery animation
   const [smoothMjVol, setSmoothMjVol] = useState(0);
   const [smoothUserVol, setSmoothUserVol] = useState(0);

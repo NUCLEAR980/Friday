@@ -162,7 +162,7 @@ export function DataVisualizer({ chart, onClose, theme }: DataVisualizerProps) {
         theme === 'dark' ? 'border-white/10 bg-white/5' : 'border-black/10 bg-black/5'
       }`}>
         <h2 className={`text-sm font-medium tracking-widest uppercase flex items-center gap-2 ${
-          theme === 'dark' ? 'text-friday-cyan' : 'text-indigo-600'
+          theme === 'dark' ? 'text-max-cyan' : 'text-indigo-600'
         }`}>
           {getIcon()}
           {chart.title}

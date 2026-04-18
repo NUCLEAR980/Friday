@@ -3,10 +3,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Mic, MicOff, MonitorUp, Video, VideoOff, Power, Loader2, Send, SwitchCamera, MonitorOff, BrainCircuit, Trash2, Settings, X, Moon, Sun, Music, LayoutGrid, User, Zap, Shield, Activity, Briefcase, Clock, Timer, Calculator, CheckSquare, Edit3, Wind, Headphones, History, Receipt, Signature, Contact2, SearchCode, Languages, MessageCircle, Mail, Type, AlarmClock, Hourglass, CalendarPlus, RefreshCw, Ruler, Globe2, BookMarked, Library, Volume2, FileText, Table, FileEdit, Presentation, GitGraph, TimerReset, Ban } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { useMJ } from './hooks/useMJ';
-import { FridayAvatar } from './components/FridayAvatar';
+import { MaxAvatar } from './components/MaxAvatar';
 import { JarvisAvatar } from './components/JarvisAvatar';
 import { QuickActions } from './components/QuickActions';
 import { DataVisualizer } from './components/DataVisualizer';
+
+const VOICE_PERSONAS = [
+  { id: 'Kore', name: 'Kore', desc: 'Female • Warm & Friendly', icon: <User className="w-4 h-4" />, color: 'from-orange-500/20 to-red-500/20' },
+  { id: 'Zephyr', name: 'Zephyr', desc: 'Female • Smooth & Professional', icon: <Briefcase className="w-4 h-4" />, color: 'from-purple-500/20 to-fuchsia-500/20' },
+  { id: 'Fenrir', name: 'Fenrir', desc: 'Male • Deep & Authoritative', icon: <User className="w-4 h-4" />, color: 'from-blue-500/20 to-indigo-500/20' },
+  { id: 'Charon', name: 'Charon', desc: 'Male • Calm & Analytical', icon: <User className="w-4 h-4" />, color: 'from-cyan-500/20 to-blue-500/20' },
+  { id: 'ElevenLabs', name: 'ElevenLabs', desc: 'Female • Best AI Voice', icon: <Zap className="w-4 h-4" />, color: 'from-pink-500/20 to-rose-500/20' },
+];
 
 export default function App() {
   const [showChat, setShowChat] = useState(false);
@@ -18,8 +26,19 @@ export default function App() {
   const [todos, setTodos] = useState<string[]>([]);
   const [contacts, setContacts] = useState<{name: string, phone: string}[]>([]);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [persona, setPersona] = useState<'friday' | 'jarvis'>('friday');
+  const [persona, setPersona] = useState<'max' | 'jarvis'>('max');
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
+  const [systemAction, setSystemAction] = useState<string | null>(null);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    if (systemAction) {
+      timeout = setTimeout(() => {
+        setSystemAction(null);
+      }, 4000);
+    }
+    return () => clearTimeout(timeout);
+  }, [systemAction]);
 
   useEffect(() => {
     const checkKey = async () => {
@@ -68,7 +87,8 @@ export default function App() {
   } = useMJ({
     setShowChat,
     setShowMemories,
-    setTheme
+    setTheme,
+    setSystemAction
   });
 
   const [chatInput, setChatInput] = useState('');
@@ -131,16 +151,34 @@ export default function App() {
   const isActuallySpeaking = isSpeaking || mjVolume > 0.01;
   const isListening = userVolume > 0.05 && !isActuallySpeaking;
 
-  const VOICE_PERSONAS = [
-    { id: 'Kore', name: 'Kore', desc: 'Female • Warm & Friendly', icon: <User className="w-4 h-4" />, color: 'from-orange-500/20 to-red-500/20' },
-    { id: 'Zephyr', name: 'Zephyr', desc: 'Female • Smooth & Professional', icon: <Briefcase className="w-4 h-4" />, color: 'from-purple-500/20 to-fuchsia-500/20' },
-    { id: 'Fenrir', name: 'Fenrir', desc: 'Male • Deep & Authoritative', icon: <User className="w-4 h-4" />, color: 'from-blue-500/20 to-indigo-500/20' },
-    { id: 'Charon', name: 'Charon', desc: 'Male • Calm & Analytical', icon: <User className="w-4 h-4" />, color: 'from-cyan-500/20 to-blue-500/20' },
-    { id: 'ElevenLabs', name: 'ElevenLabs', desc: 'Female • Best AI Voice', icon: <Zap className="w-4 h-4" />, color: 'from-pink-500/20 to-rose-500/20' },
-  ];
-
   return (
     <div className={`min-h-screen font-sans overflow-hidden relative flex flex-col items-center justify-center transition-colors duration-500 ${theme === 'dark' ? 'bg-black text-white selection:bg-white/20' : 'bg-gray-50 text-gray-900 selection:bg-black/20'}`}>
+      
+      {/* OS System Action Toast / Simulated Mobile Action */}
+      <AnimatePresence>
+        {systemAction && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 32, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -20, scale: 0.9, filter: 'blur(10px)' }}
+            className={`fixed top-0 z-[200] max-w-sm w-11/12 mx-auto flex items-center gap-4 px-6 py-4 rounded-3xl shadow-2xl backdrop-blur-xl border ${theme === 'dark' ? 'bg-max-cyan/10 border-max-cyan/30 text-max-cyan' : 'bg-indigo-600 border-indigo-500 text-white'}`}
+          >
+            <div className={`p-2 rounded-full ${theme === 'dark' ? 'bg-max-cyan/20 text-max-cyan' : 'bg-white/20 text-white'}`}>
+              <Zap className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="flex-1 font-mono">
+              <p className="text-[10px] uppercase tracking-[0.2em] opacity-70">OS Override</p>
+              <p className="text-sm font-medium leading-tight mt-0.5">{systemAction}</p>
+            </div>
+            <div className="flex gap-1 items-end h-4">
+               <div className={`w-1 bg-current animate-pulse delay-75 h-full`} />
+               <div className={`w-1 bg-current animate-pulse delay-150 h-2/3`} />
+               <div className={`w-1 bg-current animate-pulse delay-300 h-1/2`} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Atmospheric Background - Dynamic Black */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute inset-0 ${theme === 'dark' ? 'opacity-100' : 'opacity-20'}`}>
@@ -171,29 +209,17 @@ export default function App() {
       </div>
 
       {/* Main Content */}
-      {/* Made by Abhigyan Credit */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.4 }}
-        className="fixed bottom-6 right-8 z-[200] pointer-events-none"
-      >
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-[10px] tracking-[0.4em] uppercase font-light opacity-50">Architected by</span>
-          <span className="text-xs tracking-[0.2em] font-medium uppercase bg-gradient-to-r from-friday-cyan to-friday-indigo bg-clip-text text-transparent">Abhigyan</span>
-        </div>
-      </motion.div>
-
-      <main className="relative z-10 flex flex-col items-center justify-center w-full h-full px-6">
+      <main className="relative z-10 flex flex-col items-center justify-between w-full h-full px-4 md:px-6 py-6 md:py-8 lg:justify-center overflow-hidden">
         
         {/* Header - Minimal & Refined */}
-        <div className="absolute top-4 md:top-8 left-4 md:left-8 right-4 md:right-8 flex justify-between items-center z-50">
+        <div className="absolute top-4 md:top-8 left-4 md:left-8 right-4 md:right-8 flex justify-between items-start z-50">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-4"
           >
             <h1 className={`text-lg md:text-xl font-display font-light tracking-[0.3em] md:tracking-[0.5em] uppercase ${theme === 'dark' ? 'text-white/60' : 'text-gray-800'}`}>
-              F.R.I.D.A.Y.
+              MAX
             </h1>
           </motion.div>
           <motion.div 
@@ -219,11 +245,11 @@ export default function App() {
         </div>
 
         {/* Central Orb / Visualizer */}
-        <div className="relative w-full max-w-[320px] md:max-w-[500px] aspect-square flex items-center justify-center cursor-pointer" onClick={() => { if (!isConnected && !isConnecting) connect(); }}>
+        <div className="relative w-full max-w-[280px] md:max-w-[400px] lg:max-w-[500px] aspect-square flex items-center justify-center cursor-pointer mt-20 md:mt-0 flex-shrink-0" onClick={() => { if (!isConnected && !isConnecting) connect(); }}>
           <AnimatePresence mode="wait">
-            {persona === 'friday' ? (
-              <motion.div key="friday" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <FridayAvatar
+            {persona === 'max' ? (
+              <motion.div key="max" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <MaxAvatar
                   isConnected={isConnected}
                   isConnecting={isConnecting}
                   isSpeaking={isSpeaking}
@@ -500,7 +526,7 @@ export default function App() {
             <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
               {memories.length === 0 ? (
                 <p className={`text-sm italic text-center py-8 ${theme === 'dark' ? 'text-white/40' : 'text-black/40'}`}>
-                  F.R.I.D.A.Y. hasn't learned anything about you yet. Tell her something to remember!
+                  MAX hasn't learned anything about you yet. Tell him something to remember!
                 </p>
               ) : (
                 memories.map((memory, i) => (
@@ -567,10 +593,10 @@ export default function App() {
                 <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white/80' : 'text-black/80'}`}>AI Persona</span>
                 <div className={`flex items-center gap-1 p-1 rounded-full ${theme === 'dark' ? 'bg-white/10' : 'bg-black/10'}`}>
                   <button
-                    onClick={() => setPersona('friday')}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${persona === 'friday' ? (theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white') : 'text-white/50 hover:text-white'}`}
+                    onClick={() => setPersona('max')}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${persona === 'max' ? (theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white') : 'text-white/50 hover:text-white'}`}
                   >
-                    FRIDAY
+                    MAX
                   </button>
                   <button
                     onClick={() => setPersona('jarvis')}
@@ -583,10 +609,10 @@ export default function App() {
 
               {/* Wake Word Toggle */}
               <div className="flex items-center justify-between">
-                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white/80' : 'text-black/80'}`}>Wake Word ("Hey Friday")</span>
+                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white/80' : 'text-black/80'}`}>Wake Word ("Hey MAX")</span>
                 <button
                   onClick={() => setWakeWordEnabled(!wakeWordEnabled)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${wakeWordEnabled ? 'bg-friday-cyan' : (theme === 'dark' ? 'bg-white/20' : 'bg-black/20')}`}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${wakeWordEnabled ? 'bg-max-cyan' : (theme === 'dark' ? 'bg-white/20' : 'bg-black/20')}`}
                 >
                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${wakeWordEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                 </button>
@@ -631,7 +657,7 @@ export default function App() {
                       {voice === persona.id && (
                         <motion.div 
                           layoutId="active-voice"
-                          className="absolute right-3 w-1.5 h-1.5 rounded-full bg-friday-cyan shadow-[0_0_8px_rgba(0,255,255,0.5)]"
+                          className="absolute right-3 w-1.5 h-1.5 rounded-full bg-max-cyan shadow-[0_0_8px_rgba(0,255,255,0.5)]"
                         />
                       )}
                     </button>
@@ -689,7 +715,7 @@ export default function App() {
                       }}
                       className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all ${
                         !hasApiKey 
-                          ? 'bg-friday-cyan text-black hover:bg-friday-cyan/80 shadow-[0_0_15px_rgba(0,255,255,0.2)]' 
+                          ? 'bg-max-cyan text-black hover:bg-max-cyan/80 shadow-[0_0_15px_rgba(0,255,255,0.2)]' 
                           : (theme === 'dark' ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black')
                       }`}
                     >
@@ -760,7 +786,7 @@ export default function App() {
             <div className={`w-full max-w-2xl liquid-glass border rounded-[32px] overflow-hidden flex flex-col max-h-[80vh] shadow-2xl ${theme === 'dark' ? 'bg-black/80 border-white/10' : 'bg-white/90 border-black/10'}`}>
               <div className={`p-6 border-b flex justify-between items-center ${theme === 'dark' ? 'border-white/10 bg-white/5' : 'border-black/10 bg-black/5'}`}>
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-friday-cyan/20 text-friday-cyan' : 'bg-indigo-100 text-indigo-600'}`}>
+                  <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-max-cyan/20 text-max-cyan' : 'bg-indigo-100 text-indigo-600'}`}>
                     {activeTool === 'timer' && <Hourglass className="w-5 h-5" />}
                     {activeTool === 'stopwatch' && <Timer className="w-5 h-5" />}
                     {activeTool === 'alarm' && <AlarmClock className="w-5 h-5" />}
@@ -793,7 +819,7 @@ export default function App() {
                       <input 
                         type="text" 
                         placeholder="Add a new task..."
-                        className={`flex-1 px-4 py-3 rounded-xl outline-none border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-friday-cyan/50' : 'bg-black/5 border-black/10 text-black focus:border-indigo-500/50'}`}
+                        className={`flex-1 px-4 py-3 rounded-xl outline-none border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-max-cyan/50' : 'bg-black/5 border-black/10 text-black focus:border-indigo-500/50'}`}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             const val = (e.target as HTMLInputElement).value;
@@ -828,13 +854,13 @@ export default function App() {
                         id="contact-name"
                         type="text" 
                         placeholder="Name"
-                        className={`px-4 py-3 rounded-xl outline-none border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-friday-cyan/50' : 'bg-black/5 border-black/10 text-black focus:border-indigo-500/50'}`}
+                        className={`px-4 py-3 rounded-xl outline-none border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-max-cyan/50' : 'bg-black/5 border-black/10 text-black focus:border-indigo-500/50'}`}
                       />
                       <input 
                         id="contact-phone"
                         type="text" 
                         placeholder="Phone"
-                        className={`px-4 py-3 rounded-xl outline-none border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-friday-cyan/50' : 'bg-black/5 border-black/10 text-black focus:border-indigo-500/50'}`}
+                        className={`px-4 py-3 rounded-xl outline-none border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white focus:border-max-cyan/50' : 'bg-black/5 border-black/10 text-black focus:border-indigo-500/50'}`}
                       />
                     </div>
                     <button 
@@ -847,7 +873,7 @@ export default function App() {
                           (document.getElementById('contact-phone') as HTMLInputElement).value = '';
                         }
                       }}
-                      className={`w-full py-3 rounded-xl font-mono text-[10px] tracking-[0.2em] uppercase transition-all ${theme === 'dark' ? 'bg-friday-cyan text-black hover:bg-friday-cyan/80' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                      className={`w-full py-3 rounded-xl font-mono text-[10px] tracking-[0.2em] uppercase transition-all ${theme === 'dark' ? 'bg-max-cyan text-black hover:bg-max-cyan/80' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
                     >
                       Add Contact
                     </button>
@@ -874,7 +900,7 @@ export default function App() {
                         key={btn}
                         className={`p-6 rounded-2xl text-xl font-mono transition-all ${
                           ['/','*','-','+','='].includes(btn)
-                            ? (theme === 'dark' ? 'bg-friday-cyan text-black' : 'bg-indigo-600 text-white')
+                            ? (theme === 'dark' ? 'bg-max-cyan text-black' : 'bg-indigo-600 text-white')
                             : (theme === 'dark' ? 'bg-white/5 text-white hover:bg-white/10' : 'bg-black/5 text-black hover:bg-black/10')
                         }`}
                         onClick={() => {
@@ -942,7 +968,7 @@ export default function App() {
                         Clear
                       </button>
                       <button 
-                        className={`flex-1 py-3 rounded-xl font-mono text-[10px] tracking-[0.2em] uppercase ${theme === 'dark' ? 'bg-friday-cyan text-black hover:bg-friday-cyan/80' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                        className={`flex-1 py-3 rounded-xl font-mono text-[10px] tracking-[0.2em] uppercase ${theme === 'dark' ? 'bg-max-cyan text-black hover:bg-max-cyan/80' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
                       >
                         Save Signature
                       </button>
@@ -955,7 +981,7 @@ export default function App() {
                     <div className="relative w-48 h-48 flex items-center justify-center">
                       <svg className="w-full h-full -rotate-90">
                         <circle cx="96" cy="96" r="88" fill="none" stroke="currentColor" strokeWidth="4" className="opacity-10" />
-                        <circle cx="96" cy="96" r="88" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="553" strokeDashoffset="0" className={theme === 'dark' ? 'text-friday-cyan' : 'text-indigo-600'} />
+                        <circle cx="96" cy="96" r="88" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="553" strokeDashoffset="0" className={theme === 'dark' ? 'text-max-cyan' : 'text-indigo-600'} />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center text-4xl font-mono tracking-tighter">
                         00:00:00
@@ -974,7 +1000,7 @@ export default function App() {
 
                 {['relax', 'focus'].includes(activeTool) && (
                   <div className="flex flex-col items-center gap-8 py-12">
-                    <div className={`p-12 rounded-full animate-pulse ${theme === 'dark' ? 'bg-friday-cyan/10 text-friday-cyan' : 'bg-indigo-100 text-indigo-600'}`}>
+                    <div className={`p-12 rounded-full animate-pulse ${theme === 'dark' ? 'bg-max-cyan/10 text-max-cyan' : 'bg-indigo-100 text-indigo-600'}`}>
                       {activeTool === 'relax' ? <Wind className="w-16 h-16" /> : <Headphones className="w-16 h-16" />}
                     </div>
                     <div className="text-center space-y-2">
@@ -988,7 +1014,7 @@ export default function App() {
                         initial={{ x: '-100%' }}
                         animate={{ x: '100%' }}
                         transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        className={`w-1/2 h-full ${theme === 'dark' ? 'bg-friday-cyan shadow-[0_0_10px_#00FFFF]' : 'bg-indigo-600'}`}
+                        className={`w-1/2 h-full ${theme === 'dark' ? 'bg-max-cyan shadow-[0_0_10px_#00FFFF]' : 'bg-indigo-600'}`}
                       />
                     </div>
                   </div>
@@ -998,7 +1024,7 @@ export default function App() {
                   <div className="flex flex-col items-center justify-center gap-6 py-12">
                     <GitGraph className={`w-24 h-24 opacity-20 ${theme === 'dark' ? 'text-white' : 'text-black'}`} />
                     <p className={`text-center max-w-sm text-sm opacity-50 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-                      Mind Map generation protocol active. F.R.I.D.A.Y. is visualizing your concepts in the neural network.
+                      Mind Map generation protocol active. MAX is visualizing your concepts in the neural network.
                     </p>
                     <div className="grid grid-cols-3 gap-4 w-full">
                       {[1,2,3,4,5,6].map(i => (
@@ -1014,7 +1040,7 @@ export default function App() {
                     <p className={`text-center max-w-sm text-sm opacity-50 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
                       Optical Character Recognition active. Please provide an image feed for analysis.
                     </p>
-                    <button className={`px-8 py-4 rounded-2xl font-mono text-[10px] tracking-[0.2em] uppercase flex items-center gap-3 ${theme === 'dark' ? 'bg-friday-cyan text-black hover:bg-friday-cyan/80' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
+                    <button className={`px-8 py-4 rounded-2xl font-mono text-[10px] tracking-[0.2em] uppercase flex items-center gap-3 ${theme === 'dark' ? 'bg-max-cyan text-black hover:bg-max-cyan/80' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
                       <Video className="w-4 h-4" />
                       Initialize Camera
                     </button>
@@ -1036,7 +1062,7 @@ export default function App() {
             className={`fixed top-24 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-full md:max-w-md liquid-glass border rounded-3xl overflow-hidden z-40 shadow-2xl transition-all duration-500 ${theme === 'dark' ? 'bg-black/40 border-white/10' : 'bg-white/40 border-black/10'}`}
           >
             <div className={`p-4 border-b flex justify-between items-center ${theme === 'dark' ? 'border-white/10 bg-white/5' : 'border-black/10 bg-black/5'}`}>
-              <h2 className={`text-sm font-medium tracking-widest uppercase flex items-center gap-2 ${theme === 'dark' ? 'text-friday-cyan' : 'text-pink-600'}`}>
+              <h2 className={`text-sm font-medium tracking-widest uppercase flex items-center gap-2 ${theme === 'dark' ? 'text-max-cyan' : 'text-pink-600'}`}>
                 <Music className="w-4 h-4" />
                 {generatedSong.isLoading ? 'Composing...' : 'Now Playing'}
               </h2>
@@ -1088,23 +1114,32 @@ export default function App() {
         <AnimatePresence>
           {showChat && isConnected && (
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: "100%", md: { y: 50 } }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className={`fixed bottom-24 md:bottom-32 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-full md:max-w-md liquid-glass border rounded-3xl overflow-hidden flex flex-col h-[50vh] md:h-96 z-30 shadow-2xl transition-all duration-500 ${theme === 'dark' ? 'bg-black/40 border-white/10' : 'bg-white/40 border-black/10'}`}
+              exit={{ opacity: 0, y: "100%", md: { y: 50 } }}
+              className={`fixed bottom-0 md:bottom-32 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-full md:max-w-md liquid-glass border-t md:border rounded-t-3xl md:rounded-3xl overflow-hidden flex flex-col h-[60vh] md:h-96 z-[120] shadow-2xl transition-all duration-500 ${theme === 'dark' ? 'bg-black/80 md:bg-black/40 border-white/10' : 'bg-white/95 md:bg-white/40 border-black/10'}`}
             >
+              <div className="w-full flex justify-center pt-3 pb-1 md:hidden">
+                <div className={`w-12 h-1.5 rounded-full opacity-50 ${theme === 'dark' ? 'bg-white' : 'bg-black'}`} />
+              </div>
+              <div className="flex justify-between items-center px-4 pb-2 border-b md:hidden border-opacity-10 dark:border-white/10 border-black/10">
+                <span className={`text-xs font-medium tracking-widest uppercase ${theme === 'dark' ? 'text-white/60' : 'text-black/60'}`}>Chat Log</span>
+                <button onClick={() => setShowChat(false)} className={`p-1.5 rounded-full ${theme === 'dark' ? 'text-white/40' : 'text-black/40'}`}>
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
                 {messages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[85%] md:max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
                       msg.role === 'user' 
-                        ? 'bg-friday-cyan text-black rounded-br-none' 
+                        ? 'bg-accent-blue text-white rounded-br-none' 
                         : (theme === 'dark' ? 'bg-white/10 text-white/90 rounded-bl-none' : 'bg-gray-200 text-gray-900 rounded-bl-none')
                     }`}>
                       {msg.role === 'user' ? (
                         msg.text
                       ) : (
-                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-a:text-friday-cyan hover:prose-a:text-friday-cyan/80">
+                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-a:text-accent-amber hover:prose-a:text-accent-amber/80">
                           <Markdown
                             components={{
                               a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" />
@@ -1130,7 +1165,7 @@ export default function App() {
                 <button 
                   type="submit"
                   disabled={!chatInput.trim()}
-                  className={`p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${theme === 'dark' ? 'bg-white text-black' : 'bg-indigo-600 text-white'}`}
+                  className={`p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${theme === 'dark' ? 'bg-accent-blue text-white' : 'bg-accent-blue text-white'}`}
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -1139,7 +1174,17 @@ export default function App() {
           )}
         </AnimatePresence>
 
-      </main>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        className="fixed bottom-2 right-4 md:bottom-6 md:right-8 z-10 pointer-events-none"
+      >
+        <div className="flex flex-col items-end gap-0.5 md:gap-1">
+          <span className="text-[8px] md:text-[10px] tracking-[0.4em] uppercase font-light opacity-50">Architected by</span>
+          <span className="text-[10px] md:text-xs tracking-[0.2em] font-medium uppercase bg-gradient-to-r from-accent-blue via-accent-emerald to-accent-amber bg-clip-text text-transparent">Abhigyan</span>
+        </div>
+      </motion.div>
+    </main>
     </div>
   );
 }
