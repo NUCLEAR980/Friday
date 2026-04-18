@@ -29,6 +29,15 @@ export default function App() {
   const [persona, setPersona] = useState<'max' | 'jarvis'>('max');
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
   const [systemAction, setSystemAction] = useState<string | null>(null);
+  const [userApiKey, setUserApiKey] = useState<string>(() => localStorage.getItem('max_api_key') || '');
+  const [apiKeyStatus, setApiKeyStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+
+  useEffect(() => {
+    if (apiKeyStatus !== 'idle') {
+      const t = setTimeout(() => setApiKeyStatus('idle'), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [apiKeyStatus]);
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
@@ -671,63 +680,72 @@ export default function App() {
                 )}
               </div>
 
-              {/* Google Intelligence Section */}
-              <div className={`pt-4 border-t ${theme === 'dark' ? 'border-white/10' : 'border-black/10'} space-y-4`}>
+              {/* API Intelligence Console */}
+              <div className={`pt-6 border-t ${theme === 'dark' ? 'border-white/10' : 'border-black/10'} space-y-4`}>
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-mono tracking-[0.2em] uppercase ${theme === 'dark' ? 'text-white/40' : 'text-black/40'}`}>Google Intelligence</span>
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${hasApiKey ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
-                    <span className="text-[10px] font-mono uppercase opacity-50">
-                      {hasApiKey === null ? 'Checking...' : hasApiKey ? 'Active' : 'Key Required'}
-                    </span>
-                  </div>
+                  <span className={`text-[10px] font-mono tracking-[0.2em] uppercase ${theme === 'dark' ? 'text-white/40' : 'text-black/40'}`}>Advanced Intelligence Protocol</span>
+                  <Shield className={`w-3.5 h-3.5 ${userApiKey ? 'text-accent-emerald' : 'text-accent-rose'} animate-pulse`} />
                 </div>
 
-                <div className={`p-4 rounded-xl space-y-3 ${theme === 'dark' ? 'bg-white/5' : 'bg-black/5'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="text-xs font-medium">Model</span>
-                    </div>
-                    <span className="text-[10px] font-mono opacity-60">Gemini 3.1 Flash Live</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Globe2 className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="text-xs font-medium">Grounding</span>
-                    </div>
-                    <div className="flex gap-1.5">
-                      <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[8px] font-mono uppercase tracking-tighter">Search</span>
-                      <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 text-[8px] font-mono uppercase tracking-tighter">Maps</span>
+                <div className={`p-4 rounded-2xl space-y-4 ${theme === 'dark' ? 'bg-white/5 border border-white/5' : 'bg-black/5 border border-black/5'}`}>
+                  <div className="space-y-1.5">
+                    <label htmlFor="api-key-input" className="text-[10px] font-medium tracking-widest uppercase opacity-60">
+                      Gemini API Key
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="api-key-input"
+                        type="password"
+                        value={userApiKey}
+                        onChange={(e) => setUserApiKey(e.target.value)}
+                        placeholder="Paste AI_SERVICE_KEY here..."
+                        className={`w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm font-mono outline-none focus:border-max-cyan/50 transition-all ${theme === 'dark' ? 'text-white placeholder:text-white/20' : 'text-black placeholder:text-black/30'}`}
+                      />
+                      {userApiKey && (
+                        <button 
+                          onClick={() => setUserApiKey('')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 opacity-40 hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="pt-2">
-                    <button
-                      onClick={async () => {
-                        if ((window as any).aistudio && typeof (window as any).aistudio.openSelectKey === 'function') {
-                          await (window as any).aistudio.openSelectKey();
-                          // The interval in useEffect will pick up the change
-                        } else {
-                          alert("API Key selection is only available in the AI Studio environment.");
-                        }
-                      }}
-                      className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all ${
-                        !hasApiKey 
-                          ? 'bg-max-cyan text-black hover:bg-max-cyan/80 shadow-[0_0_15px_rgba(0,255,255,0.2)]' 
-                          : (theme === 'dark' ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/10 hover:bg-black/20 text-black')
-                      }`}
-                    >
-                      <Shield className="w-3.5 h-3.5" />
-                      {hasApiKey ? 'Update Google API Key' : 'Add Your Google API Key'}
-                    </button>
-                    {!hasApiKey && hasApiKey !== null && (
-                      <p className="mt-2 text-[9px] text-center opacity-40 font-mono uppercase tracking-tighter">
-                        A paid API key is required for advanced music & video generation.
-                      </p>
+                  <button
+                    onClick={() => {
+                      if (userApiKey.length < 20) {
+                        setApiKeyStatus('error');
+                        return;
+                      }
+                      localStorage.setItem('max_api_key', userApiKey);
+                      setApiKeyStatus('saved');
+                    }}
+                    disabled={apiKeyStatus === 'saved'}
+                    className={`w-full py-3 rounded-xl font-mono text-[10px] tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 ${
+                      apiKeyStatus === 'saved' 
+                        ? 'bg-accent-emerald text-black' 
+                        : apiKeyStatus === 'error'
+                        ? 'bg-accent-rose text-white'
+                        : 'bg-max-cyan text-black hover:bg-max-cyan/80 active:scale-[0.98]'
+                    }`}
+                  >
+                    {apiKeyStatus === 'saved' ? (
+                      <>
+                        <CheckSquare className="w-3.5 h-3.5" />
+                        Key Synchronized
+                      </>
+                    ) : apiKeyStatus === 'error' ? (
+                      'Invalid Key Protocol'
+                    ) : (
+                      'Commit to Neural Network'
                     )}
-                  </div>
+                  </button>
+
+                  <p className="text-[9px] leading-relaxed opacity-40 italic">
+                    <Shield className="w-2.5 h-2.5 inline mr-1" />
+                    Security Notice: This key is stored in your local enclave only. Never share your primary credentials.
+                  </p>
                 </div>
               </div>
 
