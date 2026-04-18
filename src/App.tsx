@@ -51,14 +51,24 @@ export default function App() {
 
   useEffect(() => {
     const checkKey = async () => {
+      // 1. Check Manual Key
+      const manualKey = localStorage.getItem('max_api_key');
+      if (manualKey && manualKey.length >= 20) {
+        setHasApiKey(true);
+        return;
+      }
+
+      // 2. Check AI Studio Platform Key
       if ((window as any).aistudio && typeof (window as any).aistudio.hasSelectedApiKey === 'function') {
         const selected = await (window as any).aistudio.hasSelectedApiKey();
         setHasApiKey(selected);
+      } else {
+        // 3. Fallback to Environment Variable (if visible)
+        setHasApiKey(!!process.env.GEMINI_API_KEY);
       }
     };
     checkKey();
-    // Check periodically or on focus
-    const interval = setInterval(checkKey, 5000);
+    const interval = setInterval(checkKey, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -697,13 +707,19 @@ export default function App() {
                         id="api-key-input"
                         type="password"
                         value={userApiKey}
-                        onChange={(e) => setUserApiKey(e.target.value)}
+                        onChange={(e) => {
+                          setUserApiKey(e.target.value);
+                          if (apiKeyStatus !== 'idle') setApiKeyStatus('idle');
+                        }}
                         placeholder="AI_GEMINI_SERVICE_KEY"
                         className={`w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm font-mono outline-none focus:border-max-cyan/50 transition-all ${theme === 'dark' ? 'text-white placeholder:text-white/20' : 'text-black placeholder:text-black/30'}`}
                       />
                       {userApiKey && (
                         <button 
-                          onClick={() => setUserApiKey('')}
+                          onClick={() => {
+                            setUserApiKey('');
+                            setApiKeyStatus('idle');
+                          }}
                           className="absolute right-3 top-1/2 -translate-y-1/2 p-1 opacity-40 hover:opacity-100 transition-opacity"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -721,16 +737,16 @@ export default function App() {
                       localStorage.setItem('max_api_key', userApiKey);
                       setApiKeyStatus('saved');
                     }}
-                    disabled={apiKeyStatus === 'saved'}
+                    disabled={apiKeyStatus === 'saved' || (userApiKey === localStorage.getItem('max_api_key') && userApiKey !== '')}
                     className={`w-full py-3 rounded-xl font-mono text-[10px] tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 ${
-                      apiKeyStatus === 'saved' 
-                        ? 'bg-accent-emerald text-black' 
+                      apiKeyStatus === 'saved' || (userApiKey === localStorage.getItem('max_api_key') && userApiKey !== '')
+                        ? 'bg-accent-emerald/20 text-accent-emerald border border-accent-emerald/20' 
                         : apiKeyStatus === 'error'
                         ? 'bg-accent-rose text-white'
                         : 'bg-max-cyan text-black hover:bg-max-cyan/80 active:scale-[0.98]'
                     }`}
                   >
-                    {apiKeyStatus === 'saved' ? (
+                    {apiKeyStatus === 'saved' || (userApiKey === localStorage.getItem('max_api_key') && userApiKey !== '') ? (
                       <>
                         <CheckSquare className="w-3.5 h-3.5" />
                         Key Synchronized

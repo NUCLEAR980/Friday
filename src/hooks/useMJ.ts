@@ -2,21 +2,7 @@ import { GoogleGenAI, LiveServerMessage, Modality, Type } from '@google/genai';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AudioRecorder, AudioStreamer } from '../lib/audio';
 import { ChartData } from '../components/DataVisualizer';
-
-let aiInstance: GoogleGenAI | null = null;
-let currentKey: string | null = null;
-
-function getAI() {
-  const userKey = localStorage.getItem('max_api_key');
-  const envKey = process.env.GEMINI_API_KEY || "";
-  const apiKey = userKey || envKey;
-  
-  if (!aiInstance || currentKey !== apiKey) {
-    aiInstance = new GoogleGenAI({ apiKey });
-    currentKey = apiKey;
-  }
-  return aiInstance;
-}
+import { getAI, getApiKey } from '../lib/gemini';
 
 const SYSTEM_CONTROL_TOOLS = [
   {
@@ -506,8 +492,7 @@ export function useMJ(uiControls?: MaxControls) {
         }
       }
 
-      const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
-      const lyriaAi = new GoogleGenAI({ apiKey });
+      const lyriaAi = getAI();
 
       const response = await lyriaAi.models.generateContentStream({
         model: "lyria-3-clip-preview",
@@ -715,7 +700,13 @@ export function useMJ(uiControls?: MaxControls) {
 
       const isScreenShareSupported = !!(typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
 
-      const sessionPromise = getAI().live.connect({
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        throw new Error("Missing Gemini API Key. Please add one in Settings.");
+      }
+      const ai = getAI();
+
+      const sessionPromise = ai.live.connect({
         model: "gemini-3.1-flash-live-preview",
         config: {
           responseModalities: [Modality.AUDIO],
@@ -1127,6 +1118,12 @@ export function useMJ(uiControls?: MaxControls) {
             disconnect();
           }
         }
+      }).catch(err => {
+        console.error("Session Connection Failed:", err);
+        setError("Failed to initialize neural link. Verify your API key.");
+        setIsConnecting(false);
+        setIsConnected(false);
+        throw err;
       });
 
       sessionRef.current = await sessionPromise;

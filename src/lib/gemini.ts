@@ -1,11 +1,20 @@
 import { GoogleGenAI } from "@google/genai";
 
 let aiInstance: GoogleGenAI | null = null;
+let currentKey: string | null = null;
 
-function getAI() {
-  if (!aiInstance) {
-    const key = process.env.GEMINI_API_KEY || "";
-    aiInstance = new GoogleGenAI({ apiKey: key });
+export function getApiKey() {
+  const userKey = typeof window !== 'undefined' ? localStorage.getItem('max_api_key') : null;
+  const envKey = process.env.GEMINI_API_KEY || "";
+  return userKey || envKey;
+}
+
+export function getAI() {
+  const apiKey = getApiKey();
+  
+  if (!aiInstance || currentKey !== apiKey) {
+    aiInstance = new GoogleGenAI({ apiKey });
+    currentKey = apiKey;
   }
   return aiInstance;
 }
