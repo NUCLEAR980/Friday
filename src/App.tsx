@@ -690,7 +690,7 @@ export default function App() {
                 <div className={`p-4 rounded-2xl space-y-4 ${theme === 'dark' ? 'bg-white/5 border border-white/5' : 'bg-black/5 border border-black/5'}`}>
                   <div className="space-y-1.5">
                     <label htmlFor="api-key-input" className="text-[10px] font-medium tracking-widest uppercase opacity-60">
-                      Gemini API Key
+                      Google Gemini API Key
                     </label>
                     <div className="relative">
                       <input
@@ -698,7 +698,7 @@ export default function App() {
                         type="password"
                         value={userApiKey}
                         onChange={(e) => setUserApiKey(e.target.value)}
-                        placeholder="Paste AI_SERVICE_KEY here..."
+                        placeholder="AI_GEMINI_SERVICE_KEY"
                         className={`w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm font-mono outline-none focus:border-max-cyan/50 transition-all ${theme === 'dark' ? 'text-white placeholder:text-white/20' : 'text-black placeholder:text-black/30'}`}
                       />
                       {userApiKey && (
@@ -1132,9 +1132,9 @@ export default function App() {
         <AnimatePresence>
           {showChat && isConnected && (
             <motion.div
-              initial={{ opacity: 0, y: "100%", md: { y: 50 } }}
+              initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: "100%", md: { y: 50 } }}
+              exit={{ opacity: 0, y: 100 }}
               className={`fixed bottom-0 md:bottom-32 left-0 md:left-1/2 md:-translate-x-1/2 w-full md:w-full md:max-w-md liquid-glass border-t md:border rounded-t-3xl md:rounded-3xl overflow-hidden flex flex-col h-[60vh] md:h-96 z-[120] shadow-2xl transition-all duration-500 ${theme === 'dark' ? 'bg-black/80 md:bg-black/40 border-white/10' : 'bg-white/95 md:bg-white/40 border-black/10'}`}
             >
               <div className="w-full flex justify-center pt-3 pb-1 md:hidden">

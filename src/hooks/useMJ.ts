@@ -4,11 +4,16 @@ import { AudioRecorder, AudioStreamer } from '../lib/audio';
 import { ChartData } from '../components/DataVisualizer';
 
 let aiInstance: GoogleGenAI | null = null;
+let currentKey: string | null = null;
 
 function getAI() {
-  if (!aiInstance) {
-    const key = process.env.GEMINI_API_KEY || "";
-    aiInstance = new GoogleGenAI({ apiKey: key });
+  const userKey = localStorage.getItem('max_api_key');
+  const envKey = process.env.GEMINI_API_KEY || "";
+  const apiKey = userKey || envKey;
+  
+  if (!aiInstance || currentKey !== apiKey) {
+    aiInstance = new GoogleGenAI({ apiKey });
+    currentKey = apiKey;
   }
   return aiInstance;
 }
